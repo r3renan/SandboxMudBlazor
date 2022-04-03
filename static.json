@@ -1,0 +1,5 @@
+{
+  "root": "BlazorWebAssemblyAppTeste/release/wwwroot",
+  "clean_urls": true,
+  "error_page": "index.html"
+}
