@@ -12,7 +12,7 @@ Para esse fim, foram trabalhadas duas abordagens: deploy da aplicação estátic
 
 Todos os comandos a seguir devem ser executados no mesmo nível do projeto onde se encontra o arquivo `.csproj` da aplicação que será levantada.
 
-1. Antes de mais nada, devemos definir explicitamente a stack da aplicação como heroku-20 (Ubuntu 20.04). Essa operação é necessária pois nessa abordagem de deploy não fazemos uso do arquivo `heroku.yml`, já que não é possível implantar um fluxo completo de CI-CD (pendente de mais pesquisa).
+1. Toda nova aplicação no Heroku tem heroku-20 (Ubuntu 20.04) como sua stack padrão, mas caso esta tenha sido alterada previamente, antes de mais nada, devemos redefinir a stack da aplicação para heroku-20.
 
     `heroku stack:set heroku-20 -a $appName`
     
@@ -52,15 +52,19 @@ Todos os comandos a seguir devem ser executados no mesmo nível do projeto onde 
 
 **ATENÇÃO:** Este seria meu método de deploy preferido, já que é mais prático implantar um fluxo de CI-CD por meio dele, entretanto, devemos estabelecer uma porta no container para ser utilizada pelo NGinx, e o Heroku disponibiliza uma porta aleatória a cada deploy. Como não podemos prever a porta utilizada no momento da configuração do servidor,  esse tipo de lançamento torna-se inviável da forma como está implementado hoje. Mais pesquisas podem trazer uma solução para esse problema.
 
-1. Para esse método de deploy, 2 arquivos são essenciais: `dockerfile` e `nginx.conf`, ambos já disponibilizados no repositório, no mesmo nível do arquivo `.csproj` da aplicação Blazor WASM. O `dockerfile` está configurado para buildar a aplicação e disponibilizar os arquivos estáticos diretamente na pasta `wwwroot` do servidor NGinx, e em seguida, alterar o arquivo `default.conf` do container pelo arquivo `nginx.conf`, estabelecendo o acesso da aplicação pela porta configurada.
+1. Antes de mais nada, devemos alterar a stack da aplicação para container, dessa forma, o Heroku entenderá que se trata de uma aplicação containerizada em uma imagem Docker.
+
+    `heroku stack:set container -a $appName`
+
+2. Para esse método de deploy, 2 arquivos são essenciais: `dockerfile` e `nginx.conf`, ambos já disponibilizados no repositório, no mesmo nível do arquivo `.csproj` da aplicação Blazor WASM. O `dockerfile` está configurado para buildar a aplicação e disponibilizar os arquivos estáticos diretamente na pasta `wwwroot` do servidor NGinx, e em seguida, alterar o arquivo `default.conf` do container pelo arquivo `nginx.conf`, estabelecendo o acesso da aplicação pela porta configurada.
     
     `docker build --rm -t $containerName .`
     
-2. Após buildar e testar o container, o enviamos para a plataforma Heroku, lembrando que o processo de push apenas envia o container para a plataforma, ainda não o disponibiliza no ambiente selecionado.
+3. Após buildar e testar o container, o enviamos para a plataforma Heroku, lembrando que o processo de push apenas envia o container para a plataforma, ainda não o disponibiliza no ambiente selecionado.
 
     `heroku container:push web -a $appName`
 
-3. Concluido o deploy, realizamos o release do container enviado, o que disponibilizará a aplicação do container para acesso dos usuários no ambiente selecionado.
+4. Concluido o deploy, realizamos o release do container enviado, o que disponibilizará a aplicação do container para acesso dos usuários no ambiente selecionado.
 
     `heroku container:release web -a $appName`
 
