@@ -6,7 +6,17 @@ Projeto criado com o propósito de servir como aplicação de testes do pacote d
 
 A plataforma Heroku não fornece suporte oficial para deploy de aplicações .NET, entretanto, podemos utilizar **build packs** criados pela comunidade para complementar os serviços oferecidos.
 
-Para esse fim, foram trabalhadas duas abordagens: deploy da aplicação estática (Blazor WASM) por meio de um buildpack oficial ou deploy da aplicação estática em um container docker executando um servidor Nginx interno.
+Para esse fim, foram trabalhadas duas abordagens: deploy da aplicação em um container docker executando um servidor NGinx ou deploy da aplicação por meio de um buildpack suportado ou deploy da aplicação estática.
+
+### Instruções para deploy da aplicação no Heroku como container Docker com Nginx:
+
+1. Antes de mais nada, devemos alterar a stack da aplicação para container, dessa forma, o Heroku entenderá que se trata de uma aplicação containerizada em uma imagem Docker, executando o seguinte comando via heroku-cli:
+
+    `heroku stack:set container -a $appName`
+
+2. Para esse método de deploy, 3 arquivos são essenciais: `heroku.yml`, responsável por identificar ao Heroku o método de build utilizado pela aplicação, `dockerfile` e `nginx.conf`, ambos disponibilizados no repositório no mesmo nível do arquivo `.csproj` do projeto BlazorWASM. O `dockerfile` está configurado para buildar a aplicação e disponibilizar os arquivos estáticos diretamente na pasta `wwwroot` do servidor NGinx, e em seguida, alterar o arquivo `default.conf` do container pelo arquivo `nginx.conf`, estabelecendo o acesso da aplicação pela porta configurada. Por último, a tag `$PORT` é substituida no arquivo `nginx.conf` pelo valor da variável de ambiente `$PORT` criada pelo Heroku no momento da execução do deploy.
+
+3. Por fim, basta acessar a plataforma Heroku pelo navegador Web, conectar a aplicação com o repositório Github, apontar o projeto e a branch e selecionar a opção de deploy. Dessa forma, o arquivo `heroku.yml` será lido e todos os procedimentos estabelecidos nele e no `dockerfile` serão executados.
 
 ### Instruções para deploy da aplicação no Heroku como aplicação estática com heroku-buildpack-static:
 
@@ -47,26 +57,6 @@ Todos os comandos a seguir devem ser executados no mesmo nível do projeto onde 
     `heroku static:deploy -a $appName`
     
 **Observação:** Após a configuração inicial, apenas os passos 5 e 6 precisam ser realizados para atualizar a aplicação lançada.
-
-### Instruções para deploy da aplicação no Heroku como container Docker com Nginx:
-
-**ATENÇÃO:** Este seria meu método de deploy preferido, já que é mais prático implantar um fluxo de CI-CD por meio dele, entretanto, devemos estabelecer uma porta no container para ser utilizada pelo NGinx, e o Heroku disponibiliza uma porta aleatória a cada deploy. Como não podemos prever a porta utilizada no momento da configuração do servidor,  esse tipo de lançamento torna-se inviável da forma como está implementado hoje. Mais pesquisas podem trazer uma solução para esse problema.
-
-1. Antes de mais nada, devemos alterar a stack da aplicação para container, dessa forma, o Heroku entenderá que se trata de uma aplicação containerizada em uma imagem Docker.
-
-    `heroku stack:set container -a $appName`
-
-2. Para esse método de deploy, 2 arquivos são essenciais: `dockerfile` e `nginx.conf`, ambos já disponibilizados no repositório, no mesmo nível do arquivo `.csproj` da aplicação Blazor WASM. O `dockerfile` está configurado para buildar a aplicação e disponibilizar os arquivos estáticos diretamente na pasta `wwwroot` do servidor NGinx, e em seguida, alterar o arquivo `default.conf` do container pelo arquivo `nginx.conf`, estabelecendo o acesso da aplicação pela porta configurada.
-    
-    `docker build --rm -t $containerName .`
-    
-3. Após buildar e testar o container, o enviamos para a plataforma Heroku, lembrando que o processo de push apenas envia o container para a plataforma, ainda não o disponibiliza no ambiente selecionado.
-
-    `heroku container:push web -a $appName`
-
-4. Concluido o deploy, realizamos o release do container enviado, o que disponibilizará a aplicação do container para acesso dos usuários no ambiente selecionado.
-
-    `heroku container:release web -a $appName`
 
 ## Render.com
 
