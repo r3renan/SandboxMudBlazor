@@ -1,5 +1,0 @@
-{
-  "root": "BlazorWASM/release/wwwroot",
-  "clean_urls": true,
-  "error_page": "index.html"
-}
