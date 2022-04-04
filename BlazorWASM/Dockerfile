@@ -12,4 +12,5 @@ FROM nginx:alpine AS nginxSetup
 WORKDIR /usr/share/nginx/html
 COPY --from=publish /app/publish/wwwroot .
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+RUN echo $PORT
 CMD sed -i -e 's/$PORT/'"$PORT"'/g' /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'
