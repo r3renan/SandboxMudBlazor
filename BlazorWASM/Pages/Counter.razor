@@ -2,15 +2,15 @@
 
 <PageTitle>Counter</PageTitle>
 
-<MudContainer>
+<MudContainer Fixed="true">
     <MudGrid>
-        <MudItem xs="12">
-            <MudText Typo="Typo.h1">Counter</MudText>
-
-            <MudText Typo="Typo.body1">Current count: @currentCount</MudText>
-
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="IncrementCount">Click me</MudButton>
-        </MudItem>
+        <MudPaper Class="pa-16 ma-2" Elevation="3">
+            <MudItem xs="12">
+                <MudText Typo="Typo.h1">Counter</MudText>
+                <MudText Typo="Typo.body1">Current count: @currentCount</MudText>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="IncrementCount">Click me</MudButton>
+            </MudItem>
+        </MudPaper>
     </MudGrid>
 </MudContainer>
 
